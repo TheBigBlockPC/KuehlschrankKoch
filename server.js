@@ -1,4 +1,4 @@
-
+const crypto = require("crypto");
 const path = require('path');
 const express = require('express');
 const openai = require("openai")
@@ -12,6 +12,7 @@ const client = new openai.OpenAI(
     }
 );
 function generate_prompt(data){
+    const validKeywords = new Set(["schnell","Mikrowelle","Backofen","Pfanne","Heißluftfritöse","kein kochen"])
     let ingredients = data.ingredients
     let prompt = "vorhandene zutaten:\n\"\"\"\n"
     ingredients = ingredients.replace("\"\"\"","")
@@ -24,6 +25,13 @@ function generate_prompt(data){
     }
     if(data.glutenfree){
         prompt = prompt + "Glutenfrei, "
+    }
+    prompt = prompt +"\nZubereitungsprüferenzen: "
+    for(let i =0;i < data.extra_preferences.length;i++){
+        let extra_preference = data.extra_preferences[i]
+        if(validKeywords.has(extra_preference)){
+            prompt = prompt + extra_preference + ", "
+        }
     }
     return prompt
 }
@@ -70,6 +78,8 @@ async function generate_recipe(data,id) {
     const moderation_scema = JSON.parse(fs.readFileSync('./config/moderation_scema.json', 'utf8'));
     const recipe_prompt = fs.readFileSync('./config/recipe_prompt.txt', 'utf8');
     const recipe_scema = JSON.parse(fs.readFileSync('./config/recipe_scema.json', 'utf8'));
+    //console.log(data.extra_preferences)
+    let prompt = generate_prompt(data)
     if (data.ingredients == "%debug%"){
         responses[id] = {
             status:"done",
@@ -86,7 +96,22 @@ async function generate_recipe(data,id) {
         }
         return
     }
-    let prompt = generate_prompt(data)
+    if (data.ingredients == "%debug2%"){
+        responses[id] = {
+            status:"done",
+            recipes: [
+                {
+                    ingredients:[],
+                    missing_ingredients:[],
+                    steps:[prompt],
+                    difficulty:"test",
+                    title:"Debug",
+                    description:""
+                }
+            ]
+        }
+        return
+    }
     responses[id] = {
         status:"processing",
         message:"Anfrage wird überprüft"

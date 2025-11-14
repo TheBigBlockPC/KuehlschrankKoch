@@ -157,3 +157,42 @@ h1, h2 {
   margin: 0;
   border: 0;
 }
+
+.generate_btn {
+  background: linear-gradient(-45deg, purple, rgb(255, 0, 225));
+}
+.generate_btn:disabled {
+  background: linear-gradient(-45deg, rgb(64,64,64), rgb(128,128,128));
+}
+
+.toggle-tag input {
+  display: none; /* hide checkbox */
+}
+
+.toggle-tag .tag {
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: #aaa; /* grey (off) */
+  color: white;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+  font-family: sans-serif;
+  display: inline-block;
+  margin: 4px;
+}
+.toggle-tag:hover .tag:hover {
+  background: #d6d6d6;
+}
+/* When checked → purple */
+.toggle-tag input:checked + .tag {
+  background: #7a3ef0; /* purple (on) */
+}
+.toggle-tag:hover input:checked + .tag:hover {
+  background: #4502cb; /* purple (on) */
+}
+.extra_options_container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}

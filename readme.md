@@ -21,3 +21,6 @@ run:
 npm run build
 ```
 in the /frontend folder to build the frontend
+
+## changes
+* more presice control over the output

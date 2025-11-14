@@ -100,21 +100,40 @@ function RecipesOutput(props){
     Ungültiger status: {recipes.status}
   </div>
 }
-
+function ToggleTag(props){
+  return (
+    <label className="toggle-tag">
+      <input type="checkbox" onChange={(e)=>{
+        let elementSet = props.target[0]
+        if(e.target.checked){
+          elementSet.add(props.text)
+        }else{elementSet
+          elementSet.delete(props.text)
+        }
+        props.target[1](elementSet)
+      }}/>
+      <span className="tag">{props.text}</span>
+    </label>
+  )
+}
 function App(){
   const vegan = useRef(null);
   const vegetarian = useRef(null);
   const glutenfree = useRef(null);
   const ingredients = useRef(null);
+  const send_btn = useRef(null);
   const [recipes, setrecipes] = useState({
     status: "none"
   })
+  const [send_disabled,set_send_disabled] = useState(true)
+  const extra_preferences = useState(new Set());
   const generate_event = () => {
     let data = {
       vegan: vegan.current?.checked,
       vegetarian: vegetarian.current?.checked,
       glutenfree: glutenfree.current?.checked,
-      ingredients: ingredients.current?.value
+      ingredients: ingredients.current?.value,
+      extra_preferences: [...extra_preferences[0]]
     }
     console.log(data);
     setrecipes(
@@ -126,7 +145,7 @@ function App(){
       const ID = res.recipe_context;
       let interval = setInterval(()=>{
         make_API_call("/api/poll",{recipe_context:ID}).then( res2 => {
-          if(res2.status == "done" || res2.status == "error" || res2.status == "reject"){
+          if(res2.status == "done" || res2.status == "error" || res2.status == "rejected"){
             clearInterval(interval)
           }
           setrecipes(
@@ -153,21 +172,37 @@ function App(){
     //.then(res => setCount((count) => res.count))
     
   }
+
   return (
     <>
       <img src='/Logo.png' className='logo' />
       <div className='inputContainer'>
         <label>Verfügbare zutaten</label>
-        <textarea className='ingredients' ref={ingredients}></textarea>
+        <textarea className='ingredients' ref={ingredients} onChange={(e) => {
+          if(e.target.value == ""){
+            set_send_disabled(true);
+          }else{
+            set_send_disabled(false);
+          }
+        }}></textarea>
         <label>Zusßtzliche optionen:</label>
         <div>
           <Preference_element label="vegan" ref={vegan} />
           <Preference_element label="vegetarisch" ref={vegetarian} />
           <Preference_element label="glutenfrei" ref={glutenfree} />
         </div>
+        <label>Zubereitungspräferenzen:</label>
+        <div className='extra_options_container'>
+          <ToggleTag text="schnell" target={extra_preferences}/>
+          <ToggleTag text="Mikrowelle" target={extra_preferences}/>
+          <ToggleTag text="Backofen" target={extra_preferences}/>
+          <ToggleTag text="Pfanne" target={extra_preferences}/>
+          <ToggleTag text="Heißluftfritöse" target={extra_preferences}/>
+          <ToggleTag text="kein kochen" target={extra_preferences}/>
+        </div>
         <button onClick={
           generate_event
-        }>Rezepte finden</button>
+        } className='generate_btn' ref={send_btn} disabled={send_disabled}>Rezepte finden</button>
       </div>
 
       <RecipesOutput state={recipes} generate_function={generate_event}/>
