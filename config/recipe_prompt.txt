@@ -6,3 +6,4 @@ Anzahl der Rezepte: 1
 Der Name vom Rezept soll Kreativ und appetitlich sein.
 Es müssen nicht alle vorhandene zutaten verwendet werden.
 Alle präferenzen müssen erfüllt werden.
+die schritte müssen nicht enumeriert werden
