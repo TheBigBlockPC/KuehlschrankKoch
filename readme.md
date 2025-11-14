@@ -2,8 +2,12 @@
 run:
 ```
 npm insatll
+cd frontend
+npm insatll
+npm run build
+cd ../
 ```
-to insatll all packeges<br>
+in the project root to set ut up
 create a file called "apikey.key" and put your openai API key there <br><br>
 run:
 ```
@@ -14,11 +18,6 @@ to run the server
 ## modify frontend
 run:
 ```
-npm insatll
-```
-in the /frontent folder to setup vite.<br>
-run:
-```
 npm run build
 ```
-to build the frontend
+in the /frontend folder to build the frontend
