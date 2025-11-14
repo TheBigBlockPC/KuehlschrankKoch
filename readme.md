@@ -7,7 +7,7 @@ npm insatll
 npm run build
 cd ../
 ```
-in the project root to set ut up
+in the project root to set ut up the project<br>
 create a file called "apikey.key" and put your openai API key there <br><br>
 run:
 ```
