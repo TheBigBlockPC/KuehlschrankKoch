@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "flagged": {
+      "type": "boolean",
+      "description": "Indicates whether the item is flagged (true or false)."
+    },
+    "message": {
+      "type": "string",
+      "description": "Additional message, only relevant if flagged is true.",
+      "minLength": 1
+    }
+  },
+  "required": [
+    "flagged",
+    "message"
+  ],
+  "additionalProperties": false
+}
