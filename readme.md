@@ -1,9 +1,21 @@
+# KühlschrankKoch
+## what is it
+An AI tool to decide what to coock based on the content of the Fridge.
+## features
+* GPT-5.1 powered recepie generation
+* Ingredient input
+* preference choices (r.g. vegan, vegetarial, gluten free)
+* coocking preferences
+## updates
+* Download feature
+## languages
+* German
 ## setup
 run:
 ```
-npm insatll
+npm install
 cd frontend
-npm insatll
+npm install
 npm run build
 cd ../
 ```
@@ -21,6 +33,3 @@ run:
 npm run build
 ```
 in the /frontend folder to build the frontend
-
-## changes
-* more presice control over the output
