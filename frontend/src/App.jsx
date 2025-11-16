@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import spinner from './assets/spinner.svg'
 import regenerate from './assets/reload.svg'
+import download from './assets/download.svg'
 import './App.css'
 
 function make_API_call(endpoint,data){
@@ -75,6 +76,7 @@ function RecipesOutput(props){
     const ingredients = r.ingredients
     const missing_ingredients = r.missing_ingredients
     const steps = r.steps
+    const URL = `/pdf/${recipes.id}`
     return (
       <div className='outputContainer'>
         <h1 className='centered'>{r.title}</h1>
@@ -90,9 +92,12 @@ function RecipesOutput(props){
         </ol>
         <br />
         Schwierigkeit: {r.difficulty}
-        <button onClick={props.generate_function}>
-          <img src={regenerate} alt='generate again'></img>
-        </button>
+        <div className="recipe_interactions">
+          <button onClick={props.generate_function}>
+            <img src={regenerate} alt='generate again'></img>
+          </button>
+          <a href={URL} className='download_btn' download><img src={download}></img></a>
+        </div>
       </div>
     )
   }
@@ -204,8 +209,8 @@ function App(){
           generate_event
         } className='generate_btn' ref={send_btn} disabled={send_disabled}>Rezepte finden</button>
       </div>
-
       <RecipesOutput state={recipes} generate_function={generate_event}/>
+      
     </>
   )
 }
