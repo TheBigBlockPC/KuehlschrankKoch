@@ -3,6 +3,9 @@ const path = require('path');
 const express = require('express');
 const openai = require("openai")
 const fs = require('fs');
+const PDF = require('pdfkit');
+
+//const PDFDocument = PDF.PDFDocument;
 
 const app = express();
 const apiKey = fs.readFileSync('apikey.key', 'utf8');
@@ -169,6 +172,71 @@ app.post('/api/poll', (req, res) => {
     }else{
         res.json(response);
     }
+});
+
+function add_horizontal_line(doc){
+    doc.moveTo(50, doc.y + 10)       // x start, y start
+        .lineTo(550, doc.y + 10)      // x end, y same
+        .lineWidth(1)                 // line thickness
+        .strokeColor('#000000')       // line color
+        .stroke();                     // actually draw the line
+    doc.moveDown();
+}
+function add_logo(doc){
+    const imagePath = './frontend/public/Logo.png';
+    const imageWidth = 100; // desired width
+    const imageHeight = 100; // optional, PDFKit preserves aspect ratio if not provided
+
+    // Calculate top-right corner
+    const pageWidth = doc.page.width;
+    const margin = 50; // same as doc margin
+    const x = pageWidth - imageWidth - margin; // right-aligned
+    const y = margin; // from top
+
+    // Place the image
+    doc.image(imagePath, x, y, { width: imageWidth, height: imageHeight });
+
+}
+app.get('/pdf/:id', (req, res) => {
+    const { id } = req.params;
+    const content = {
+        ingredients:["apfel", "birne"],
+        missing_ingredients:["apfel", "birne"],
+        steps:["a long debug test to test wrapping of text to see if styling works. a long debug test to test wrapping of text to see if styling works. a long debug test to test wrapping of text to see if styling works."],
+        difficulty:"test",
+        title:"Debug",
+        description:"a long debug test to test wrapping of text to see if styling works"
+    }
+    // Create a new PDF document in memory
+    const doc = new PDF({ size: 'A4', margin: 50 });
+    const width = doc.page.width-100;
+    // Set response headers
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="example.pdf"');
+
+    // Pipe PDF to response directly (in-memory)
+    doc.pipe(res);
+    
+    // Add some content
+    doc.fontSize(25).text(content.title, { align: 'center',width: width-100});
+    doc.fontSize(18).text(content.description, { align: 'center',width: width-100});
+    
+    add_horizontal_line(doc);
+    doc.fontSize(18).text('Zutaten:', { align: 'left' });
+    content.ingredients.forEach(item => {
+        doc.text(`• ${item}`, { indent: 20 });
+    });
+    add_horizontal_line(doc);
+    doc.fontSize(18).text('Schritte:', { align: 'left' });
+    content.steps.forEach((item, i) => {
+        doc.text(`${i + 1}. ${item}`, { indent: 20 });
+    });
+    add_logo(doc)
+    add_horizontal_line(doc);
+    doc.fontSize(18).text(`Schwierigkeit: ${content.difficulty}`, { align: 'left' });
+    doc.fontSize(18).text(`Schwierigkeit: ${id}`, { align: 'left' });
+    // Finalize the PDF and end the stream
+    doc.end();
 });
 // Serve static files from the Vite build
 const distPath = path.join(__dirname, 'frontend/dist'); // adjust if different path
