@@ -21,6 +21,10 @@ button:hover {
   border-color: #646cff;
   background-color: #373737;
 }
+button:disabled {
+  background-color: #808080;
+  border: 1px solid transparent;
+}
 button:focus, button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
@@ -34,7 +38,6 @@ h1, h2 {
   display: grid;
   background-color: #474747;
   justify-items: center;
-  width: 90%;
   border-radius: 16px;
   padding: 8px;
   margin-bottom: 8px;
@@ -226,4 +229,32 @@ h1, h2 {
 
 .recipe_interactions * {
   margin: 4px;
+  justify-content: center;
+}
+.recipe_interactions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.number_input_btn {
+  padding: 4px;
+  background: #373737;
+  border-radius: 0%;
+}
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+.number_input {
+  color: #ffffff;
+  background-color: #474747;
+  border-color: #ffffff;
+  font-size: 22px;
 }

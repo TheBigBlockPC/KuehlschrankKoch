@@ -2,6 +2,8 @@ import { useState, useRef } from 'react'
 import spinner from './assets/spinner.svg'
 import regenerate from './assets/reload.svg'
 import download from './assets/download.svg'
+import arrow_left from './assets/arrow_left.svg'
+import arrow_right from './assets/arrow_right.svg'
 import './App.css'
 
 function make_API_call(endpoint,data){
@@ -42,7 +44,8 @@ function OptionalUnorderedList(props){
 }
 function RecipesOutput(props){
   const recipes = props.state
-  
+  const recipe_idx = props.recipe_idx[0]
+  const recipe_idx_set = props.recipe_idx[1]
   let key = 0;
   if(recipes.status == "none"){
     return <></>
@@ -72,11 +75,11 @@ function RecipesOutput(props){
     </div>
   }
   if(recipes.status == "done"){
-    const r = recipes.recipes[0]
+    const r = recipes.recipes[recipe_idx]
     const ingredients = r.ingredients
     const missing_ingredients = r.missing_ingredients
     const steps = r.steps
-    const URL = `/pdf/${recipes.id}`
+    const URL = `/pdf/${recipes.id}/${recipe_idx}`
     return (
       <div className='outputContainer'>
         <h1 className='centered'>{r.title}</h1>
@@ -97,6 +100,17 @@ function RecipesOutput(props){
             <img src={regenerate} alt='generate again'></img>
           </button>
           <a href={URL} className='download_btn' download><img src={download}></img></a>
+          <button onClick={()=>{
+            recipe_idx_set(recipe_idx-1)
+          }} disabled={recipe_idx <= 0}>
+            <img src={arrow_left} alt='prev'></img>
+          </button>
+          {recipe_idx+1} / {recipes.recipes.length}
+          <button onClick={()=>{
+            recipe_idx_set(recipe_idx+1)
+          }} disabled={recipe_idx >= recipes.recipes.length-1}>
+            <img src={arrow_right} alt='next'></img>
+          </button>
         </div>
       </div>
     )
@@ -132,13 +146,18 @@ function App(){
   })
   const [send_disabled,set_send_disabled] = useState(true)
   const extra_preferences = useState(new Set());
+  const recipe_idx = useState(0);
+  const [recipe_count, set_recipe_count] = useState(1); // initial value
+
   const generate_event = () => {
+    recipe_idx[1](0)
     let data = {
       vegan: vegan.current?.checked,
       vegetarian: vegetarian.current?.checked,
       glutenfree: glutenfree.current?.checked,
       ingredients: ingredients.current?.value,
-      extra_preferences: [...extra_preferences[0]]
+      extra_preferences: [...extra_preferences[0]],
+      num_recipes: recipe_count
     }
     console.log(data);
     setrecipes(
@@ -204,12 +223,32 @@ function App(){
           <ToggleTag text="Pfanne" target={extra_preferences}/>
           <ToggleTag text="Heißluftfritöse" target={extra_preferences}/>
           <ToggleTag text="kein kochen" target={extra_preferences}/>
+          <ToggleTag text="5 Zutaten" target={extra_preferences}/>
+          <ToggleTag text="wenig Zutaten" target={extra_preferences}/>
+        </div>
+        <label>Einstellungen:</label>
+        <div>
+          Anzahl der rezepte:
+          <button className='number_input_btn' onClick={()=>{
+            set_recipe_count(recipe_count-1)
+          }} disabled={recipe_count<=1}>-</button>
+          <input className='number_input' type='number' min="1" max="5" value={recipe_count} onChange={(e) => {
+            const val = Number(e.target.value);
+
+            // Optional: enforce the range
+            if (val >= 1 && val <= 10) {
+              set_recipe_count(val);
+            }
+          }}></input>
+          <button className='number_input_btn' onClick={()=>{
+            set_recipe_count(recipe_count+1)
+          }} disabled={recipe_count>=5}>+</button>
         </div>
         <button onClick={
           generate_event
         } className='generate_btn' ref={send_btn} disabled={send_disabled}>Rezepte finden</button>
       </div>
-      <RecipesOutput state={recipes} generate_function={generate_event}/>
+      <RecipesOutput state={recipes} generate_function={generate_event} recipe_idx={recipe_idx}/>
       
     </>
   )

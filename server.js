@@ -4,6 +4,7 @@ const express = require('express');
 const openai = require("openai")
 const fs = require('fs');
 const PDF = require('pdfkit');
+const { title } = require("process");
 
 //const PDFDocument = PDF.PDFDocument;
 
@@ -15,7 +16,7 @@ const client = new openai.OpenAI(
     }
 );
 function generate_prompt(data){
-    const validKeywords = new Set(["schnell","Mikrowelle","Backofen","Pfanne","Heißluftfritöse","kein kochen"])
+    const validKeywords = new Set(["schnell","Mikrowelle","Backofen","Pfanne","Heißluftfritöse","kein kochen","5 Zutaten","wenig Zutaten"])
     let ingredients = data.ingredients
     let prompt = "vorhandene zutaten:\n\"\"\"\n"
     ingredients = ingredients.replace("\"\"\"","")
@@ -79,8 +80,17 @@ async function generate_object(system_prompt,prompt,scema,reasoning="none"){
 async function generate_recipe(data,id) {
     const moderation_prompt = fs.readFileSync('./config/moderation_prompt.txt', 'utf8');
     const moderation_scema = JSON.parse(fs.readFileSync('./config/moderation_scema.json', 'utf8'));
-    const recipe_prompt = fs.readFileSync('./config/recipe_prompt.txt', 'utf8');
+    let recipe_prompt = fs.readFileSync('./config/recipe_prompt.txt', 'utf8');
     const recipe_scema = JSON.parse(fs.readFileSync('./config/recipe_scema.json', 'utf8'));
+    const num_recipes = data.num_recipes
+    if (num_recipes < 1 | num_recipes >5){
+        responses[id] = {
+            status:"error",
+            error:"invallid data"
+        }
+        return
+    }
+    recipe_prompt = recipe_prompt .replace("<num>",`${num_recipes}`)
     //console.log(data.extra_preferences)
     let prompt = generate_prompt(data)
     if (data.ingredients == "%debug%"){
@@ -94,6 +104,14 @@ async function generate_recipe(data,id) {
                     difficulty:"test",
                     title:"Debug",
                     description:"a long debug test to test wrapping of text to see if styling works"
+                },
+                {
+                    ingredients:["debug"],
+                    missing_ingredients:["debug"],
+                    steps:["debug"],
+                    difficulty:"debug",
+                    title:"debug2",
+                    description:"..."
                 }
             ],
             id: id
@@ -201,8 +219,8 @@ function add_logo(doc){
     doc.image(imagePath, x, y, { width: imageWidth, height: imageHeight });
     
 }
-app.get('/pdf/:id', (req, res) => {
-    const { id } = req.params;
+app.get('/pdf/:id/:variant', (req, res) => {
+    const { id, variant } = req.params;
     const response = responses[id]
     if(!response){
         res.status(404).json({status:"error",error:"element not found"});
@@ -210,7 +228,10 @@ app.get('/pdf/:id', (req, res) => {
     if(response.status != "done"){
         res.status(404).json({status:"error",error:"element not found"});
     }
-    const content = response.recipes[0]
+    const content = response.recipes[variant]
+     if(!content){
+        res.status(404).json({status:"error",error:"element not found"});
+    }
     /*{
         ingredients:["apfel", "birne"],
         missing_ingredients:["apfel", "birne"],
